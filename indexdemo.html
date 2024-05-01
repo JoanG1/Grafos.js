@@ -9,75 +9,51 @@
         /* Estilos para el menú de navegación */
         nav {
             display: flex;
-            flex-direction: column; /* Mostrar elementos en columna */
+            justify-content: space-around;
             align-items: center;
-            background-color: #000000;
+            background-color: #f0f0f0;
             padding: 10px 0;
-            border-radius: 10px 0 0 10px;
         }
         nav a {
             text-decoration: none;
-            color: #ffffff;
+            color: #333;
             font-weight: bold;
             padding: 8px 16px;
             border-radius: 5px;
             transition: background-color 0.3s ease;
-            margin-bottom: 10px; /* Espacio entre elementos del menú */
         }
         nav a:hover {
             background-color: #ddd;
-            color: #000000;
-            
         }
         .node {
+            fill: blue;
+            stroke: #fff;
+            stroke-width: 2px;
             cursor: pointer;
         }
-        .node circle {
-            fill: rgb(0, 0, 0);
-            stroke: #ffffff;
-            stroke-width: 2px;
-        }
-        .node text {
-            font-size: 14px;
-            fill: rgb(255, 255, 255);
-            pointer-events: none; /* Evitar interacciones con el texto */
-        }
         .link {
-            stroke: #ccc;
+            stroke: gray;
             stroke-width: 2px;
-        }
-
-        .marked { /* Estilo para aristas marcadas */
-            stroke: rgb(0, 255, 0);
-            stroke-width: 3px;
-        }
-
-        .marked-node { /* Estilo para nodos marcados */
-            stroke: rgb(255, 251, 0) !important; /* Cambiar el color de relleno a verde */
         }
     </style>
 </head>
-<body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
-
+<body>
     <nav>
         <a href="#" id="createNode">Crear nodo</a>
         <a href="#" id="markVertices">Marcar vértices</a>
         <a href="#" id="markEdges">Marcar aristas</a>
     </nav>
-    
-    <svg width="1200" height="700" style="background-color: rgb(0, 0, 0); border-radius: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);"></svg>
+
+    <svg width="800" height="600"></svg> <!-- Área SVG para dibujar el grafo -->
 
     <script>
-
-        const svgWidth = 1200;
-        const svgHeight = 700;
-        const nodeRadius = 20;
+        // Datos del grafo (nodos y aristas)
         const graph = {
             nodes: [
-                { id: "A" },
-                { id: "B" },
-                { id: "C" },
-                { id: "D" }
+                { id: "A", x: 100, y: 100 },
+                { id: "B", x: 300, y: 100 },
+                { id: "C", x: 100, y: 300 },
+                { id: "D", x: 300, y: 300 }
             ],
             links: [
                 { source: "A", target: "B" },
@@ -87,54 +63,61 @@
             ]
         };
 
+        // Tamaño del área SVG
+        const svgWidth = 800;
+        const svgHeight = 600;
+
+        // Margen mínimo para mantener el nodo completamente visible
+        const nodeRadius = 20;
+
+        // Crear el área SVG
         const svg = d3.select("svg");
 
+        // Definir la simulación de fuerza
         const simulation = d3.forceSimulation(graph.nodes)
-            .force("link", d3.forceLink(graph.links).id(d => d.id).distance(150))
-            .force("charge", d3.forceManyBody().strength(-200))
-            .force("center", d3.forceCenter(600, 350));
+            .force("link", d3.forceLink(graph.links).id(d => d.id).distance(100))
+            .force("charge", d3.forceManyBody().strength(-200)) // Repulsión entre nodos
+            .force("center", d3.forceCenter(svgWidth / 2, svgHeight / 2)); // Centrar la simulación en el medio del SVG
 
+        // Dibujar los enlaces (aristas)
         const links = svg.selectAll(".link")
             .data(graph.links)
             .enter().append("line")
             .attr("class", "link");
 
+        // Dibujar los nodos
         const nodes = svg.selectAll(".node")
             .data(graph.nodes)
-            .enter().append("g")
+            .enter().append("circle")
             .attr("class", "node")
+            .attr("r", nodeRadius)
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y)
             .call(d3.drag()
                 .on("start", dragStarted)
-                .on("drag", dragging));
+                .on("drag", dragging)
+                .on("end", dragEnded));
 
-        nodes.append("circle")
-            .attr("r", 20);
-
-        nodes.append("text")
-            .text(d => d.id)
-            .attr("text-anchor", "middle")
-            .attr("dy", 5);
-
+        // Funciones de arrastre para los nodos
         function dragStarted(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
+            if (!event.active) simulation.alphaTarget(0.3).restart(); // Reiniciar la simulación
+            d.fx = d.x; // Fijar la posición inicial del nodo
             d.fy = d.y;
         }
 
         function dragging(event, d) {
+            // Limitar la posición del nodo dentro de los límites del SVG
             d.fx = Math.max(nodeRadius, Math.min(svgWidth - nodeRadius, event.x)); // Limitar dentro del ancho del SVG
             d.fy = Math.max(nodeRadius, Math.min(svgHeight - nodeRadius, event.y)); // Limitar dentro de la altura del SVG
         }
 
-        function markEdges() {
-            links.classed("marked", true); // Aplicar la clase 'marked' a todas las aristas
+        function dragEnded(event, d) {
+            if (!event.active) simulation.alphaTarget(0); // Detener la simulación al soltar el nodo
+            d.fx = null; // Liberar la posición fija del nodo
+            d.fy = null;
         }
 
-        function markVertices(){
-            nodes.classed("marked-node", true);
-        }
-
-
+        // Función de actualización en cada paso de la simulación
         simulation.on("tick", () => {
             links
                 .attr("x1", d => d.source.x)
@@ -143,9 +126,11 @@
                 .attr("y2", d => d.target.y);
 
             nodes
-                .attr("transform", d => `translate(${d.x},${d.y})`);
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y);
         });
 
+        // Eventos para las opciones del menú de navegación (aún sin función)
         d3.select("#createNode").on("click", () => {
             // Lógica para crear un nuevo nodo
             console.log("Crear nodo");
@@ -153,15 +138,14 @@
 
         d3.select("#markVertices").on("click", () => {
             // Lógica para marcar vértices
-            markVertices();
+            console.log("Marcar vértices");
         });
 
         d3.select("#markEdges").on("click", () => {
             // Lógica para marcar aristas
-            markEdges();
+            console.log("Marcar aristas");
         });
 
     </script>
-    
 </body>
 </html>
