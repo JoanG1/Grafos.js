@@ -47,6 +47,11 @@
             stroke-width: 2px;
         }
 
+        .marked2 {
+            stroke: #ffffff;
+            stroke-width: 2px;
+        }
+
         .marked { /* Estilo para aristas marcadas */
             stroke: rgb(0, 255, 0);
             stroke-width: 3px;
@@ -69,6 +74,7 @@
 
     <script>
 
+        var aux = 0;
         const svgWidth = 1200;
         const svgHeight = 700;
         const nodeRadius = 20;
@@ -127,11 +133,30 @@
         }
 
         function markEdges() {
-            links.classed("marked", true); // Aplicar la clase 'marked' a todas las aristas
+            if(aux == 0){
+                links.classed("marked", true); // Aplicar la clase 'marked' a todas las aristas
+                aux++;
+                console.log(aux);
+            }else if (aux == 1){
+                //links.classed("marked2", true);
+                links.classed("marked", false); 
+                aux--;
+                console.log(aux);
+            }
         }
 
         function markVertices(){
-            nodes.classed("marked-node", true);
+            
+            if(aux == 0){
+                nodes.classed("marked-node", true); // Aplicar la clase 'marked' a todas las aristas
+                aux++;
+                console.log(aux);
+            }else if (aux == 1){
+                //links.classed("marked2", true);
+                nodes.classed("marked-node", false);; 
+                aux--;
+                console.log(aux);
+            }
         }
 
 
