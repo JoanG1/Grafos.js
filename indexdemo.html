@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,146 +8,140 @@
     <title>Interactive Graph Visualization with D3.js</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        /* Estilos para el menú de navegación */
-        nav {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background-color: #f0f0f0;
-            padding: 10px 0;
-        }
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            padding: 8px 16px;
+        /* Estilos para el panel de configuración */
+        #configPanel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        nav a:hover {
-            background-color: #ddd;
+        #configPanel label {
+            display: block;
+            margin-bottom: 10px;
         }
-        .node {
-            fill: blue;
-            stroke: #fff;
-            stroke-width: 2px;
+        #configPanel button {
+            padding: 8px 16px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
             cursor: pointer;
         }
-        .link {
-            stroke: gray;
-            stroke-width: 2px;
+        #configPanel button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="#" id="createNode">Crear nodo</a>
-        <a href="#" id="markVertices">Marcar vértices</a>
-        <a href="#" id="markEdges">Marcar aristas</a>
-    </nav>
+    <div id="configPanel">
+        <label for="nodeCount">Cantidad de Nodos:</label>
+        <input type="number" id="nodeCount" min="1" value="4">
 
-    <svg width="800" height="600"></svg> <!-- Área SVG para dibujar el grafo -->
+        <label for="connectionType">Tipo de Conexión:</label>
+        <select id="connectionType">
+            <option value="random">Conexiones Aleatorias</option>
+            <option value="fullyConnected">Todos Conectados</option>
+        </select>
+
+        <button onclick="createGraph()">Crear Grafo</button>
+    </div>
+
+    <svg id="graphSvg" width="800" height="600"></svg> <!-- Área SVG para dibujar el grafo -->
 
     <script>
-        // Datos del grafo (nodos y aristas)
-        const graph = {
-            nodes: [
-                { id: "A", x: 100, y: 100 },
-                { id: "B", x: 300, y: 100 },
-                { id: "C", x: 100, y: 300 },
-                { id: "D", x: 300, y: 300 }
-            ],
-            links: [
-                { source: "A", target: "B" },
-                { source: "A", target: "C" },
-                { source: "B", target: "D" },
-                { source: "C", target: "D" }
-            ]
+        let graph = {
+            nodes: [],
+            links: []
         };
 
-        // Tamaño del área SVG
-        const svgWidth = 800;
-        const svgHeight = 600;
+        const svg = d3.select("#graphSvg");
 
-        // Margen mínimo para mantener el nodo completamente visible
-        const nodeRadius = 20;
+        function createGraph() {
+            // Limpiar el grafo anterior si existe
+            svg.selectAll("*").remove();
 
-        // Crear el área SVG
-        const svg = d3.select("svg");
+            const nodeCount = parseInt(document.getElementById("nodeCount").value);
+            const connectionType = document.getElementById("connectionType").value;
 
-        // Definir la simulación de fuerza
-        const simulation = d3.forceSimulation(graph.nodes)
-            .force("link", d3.forceLink(graph.links).id(d => d.id).distance(100))
-            .force("charge", d3.forceManyBody().strength(-200)) // Repulsión entre nodos
-            .force("center", d3.forceCenter(svgWidth / 2, svgHeight / 2)); // Centrar la simulación en el medio del SVG
 
-        // Dibujar los enlaces (aristas)
-        const links = svg.selectAll(".link")
-            .data(graph.links)
-            .enter().append("line")
-            .attr("class", "link");
+            console.log(nodeCount)
+            console.log(connectionType)
+            // Crear nodos
+            graph.nodes = d3.range(nodeCount).map(i => ({ id: "Node_" + i })); // Usar cadenas únicas como identificadores
 
-        // Dibujar los nodos
-        const nodes = svg.selectAll(".node")
-            .data(graph.nodes)
-            .enter().append("circle")
-            .attr("class", "node")
-            .attr("r", nodeRadius)
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y)
-            .call(d3.drag()
-                .on("start", dragStarted)
-                .on("drag", dragging)
-                .on("end", dragEnded));
+            // Crear conexiones (aristas)
+            graph.links = [];
+            if (connectionType === "random") {
+                // Conexiones aleatorias entre nodos
+                for (let i = 0; i < nodeCount; i++) {
+                    const sourceIndex = i;
+                    let targetIndex;
+                    do {
+                        targetIndex = Math.floor(Math.random() * nodeCount);
+                    } while (targetIndex === sourceIndex);
+                    graph.links.push({ source: "Node_" + sourceIndex, target: "Node_" + targetIndex });
+                }
+            } else if (connectionType === "fullyConnected") {
+                // Todos los nodos conectados entre sí
+                for (let i = 0; i < nodeCount; i++) {
+                    for (let j = i + 1; j < nodeCount; j++) {
+                        graph.links.push({ source: "Node_" + i, target: "Node_" + j });
+                    }
+                }
+            }
 
-        // Funciones de arrastre para los nodos
+            // Dibujar el grafo
+            drawGraph();
+        }
+
+        function drawGraph() {
+            const simulation = d3.forceSimulation(graph.nodes)
+                .force("link", d3.forceLink(graph.links).id(d => d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-200))
+                .force("center", d3.forceCenter(400, 300));
+
+            const links = svg.selectAll(".link")
+                .data(graph.links)
+                .enter().append("line")
+                .attr("class", "link")
+                .style("stroke", "black");
+
+            const nodes = svg.selectAll(".node")
+                .data(graph.nodes)
+                .enter().append("circle")
+                .attr("class", "node")
+                .attr("r", 20)
+                .attr("fill", "blue")
+                .call(d3.drag()
+                    .on("start", dragStarted)
+                    .on("drag", dragging));
+
+            simulation.on("tick", () => {
+                links
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                nodes
+                    .attr("transform", d => `translate(${d.x},${d.y})`);
+            });
+        }
+
         function dragStarted(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart(); // Reiniciar la simulación
-            d.fx = d.x; // Fijar la posición inicial del nodo
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
             d.fy = d.y;
         }
 
         function dragging(event, d) {
-            // Limitar la posición del nodo dentro de los límites del SVG
             d.fx = Math.max(nodeRadius, Math.min(svgWidth - nodeRadius, event.x)); // Limitar dentro del ancho del SVG
             d.fy = Math.max(nodeRadius, Math.min(svgHeight - nodeRadius, event.y)); // Limitar dentro de la altura del SVG
         }
-
-        function dragEnded(event, d) {
-            if (!event.active) simulation.alphaTarget(0); // Detener la simulación al soltar el nodo
-            d.fx = null; // Liberar la posición fija del nodo
-            d.fy = null;
-        }
-
-        // Función de actualización en cada paso de la simulación
-        simulation.on("tick", () => {
-            links
-                .attr("x1", d => d.source.x)
-                .attr("y1", d => d.source.y)
-                .attr("x2", d => d.target.x)
-                .attr("y2", d => d.target.y);
-
-            nodes
-                .attr("cx", d => d.x)
-                .attr("cy", d => d.y);
-        });
-
-        // Eventos para las opciones del menú de navegación (aún sin función)
-        d3.select("#createNode").on("click", () => {
-            // Lógica para crear un nuevo nodo
-            console.log("Crear nodo");
-        });
-
-        d3.select("#markVertices").on("click", () => {
-            // Lógica para marcar vértices
-            console.log("Marcar vértices");
-        });
-
-        d3.select("#markEdges").on("click", () => {
-            // Lógica para marcar aristas
-            console.log("Marcar aristas");
-        });
-
     </script>
 </body>
 </html>
