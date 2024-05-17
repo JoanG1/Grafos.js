@@ -10,7 +10,7 @@
         .configPanel {
             position: fixed; /* Establece la posición fija */
             top: 30%; /* Ubica el borde superior del div en el centro vertical */
-            left: 30%; /* Ubica el borde izquierdo del div en el centro horizontal */
+            left: 32%; /* Ubica el borde izquierdo del div en el centro horizontal */
             transform: translate(-50%, -50%); /* Corrige el centrado ajustando el desplazamiento */
             background-color: rgba(255, 255, 255, 0); /* Color de fondo (cambia según tus necesidades) */
             border-radius: 5px;
@@ -20,6 +20,12 @@
         }
         .configPanel label {
             display: block;
+            color: #ffffff;
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .configPanel p{
             color: #ffffff;
             font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             margin-bottom: 10px;
@@ -114,6 +120,19 @@
         .marked-node { /* Estilo para nodos marcados */
             stroke: rgb(255, 255, 0) !important; /* Cambiar el color de relleno a verde */
         }
+
+        #Phamiltonianos::-webkit-scrollbar {
+        width: 8px; /* Ancho de la barra de scroll */
+        }   
+
+        #Phamiltonianos::-webkit-scrollbar-track {
+        background-color: #f1f1f100; /* Color de fondo de la barra de scroll */
+        }
+
+        #Phamiltonianos::-webkit-scrollbar-thumb {
+        background-color: #888; /* Color del "pulgarcito" de la barra de scroll */
+        border-radius: 4px; /* Borde redondeado del "pulgarcito" */
+        }   
     </style>
 </head>
 <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;background-image: url('iamgen.avif'); background-size: cover; background-position: center; background-repeat: no-repeat;">
@@ -134,6 +153,11 @@
         </select>
 
         <button onclick="createGraph()">Crear Grafo</button>
+    </div>
+
+    <div id="Phamiltonianos" class="configPanel" style="display: none;left: 32%; top:35%; height: 300px; width: 300px; overflow-y: scroll;">
+        <label>Caminos Hamiltonianos:</label>
+        <br>
     </div>
 
     <div id="configPanel2" style="display: none;" class="configPanel">
@@ -168,6 +192,7 @@
         <button onclick="markEdges()">Marcar Aristas</button>
         <button onclick="editEdges()">Editar Aristas</button>
         <button onclick="generateAdjacencyMatrix()">Generar matriz</button>
+        <button onclick="CaminosHamiltonianos()">Caminos hamiltoniano</button>
         
         
     </nav>
@@ -231,12 +256,12 @@ let simulation = d3.forceSimulation(graph.nodes)
 
 
 function createGraph(){
-
+            
+    
     const nodeCount = parseInt(document.getElementById("nodeCount").value);
+            
     const connectionType = document.getElementById("connectionType").value;
 
-    console.log(nodeCount)
-    console.log(connectionType)
     svg.selectAll("*").remove();
 
     graph.nodes = d3.range(nodeCount).map(i => ({ id: "N" + i })); // Usar cadenas únicas como identificadores
@@ -361,6 +386,75 @@ nodes.append("text")
     nodes
         .attr("transform", d => `translate(${d.x},${d.y})`);
 });
+
+}
+        function CaminosHamiltonianos() {
+
+            let grapho = graph;
+
+            console.table(grapho)
+            
+            const paths = [];
+
+                function backtrack(path) {
+                const lastNode = path[path.length - 1];
+
+                console.log("PRUEBA")
+                console.log(lastNode)
+                console.log(path)
+                console.log(path.length)
+            
+                console.log(path.length === grapho.nodes.length)
+                console.log(path[0]+"=="+ lastNode)
+                console.log(path[0] === lastNode)
+
+                // Si el camino es hamiltoniano y regresa al primer nodo
+                if (path.length === grapho.nodes.length) {
+                paths.push([...path]);
+                return;
+                }
+
+                // Iterar sobre todos los nodos
+                for (const node of grapho.nodes) {
+                // Verificar si el nodo no está en el camino actual
+                    if (!path.includes(node.id)) {
+                // Verificar si hay una conexión entre el último nodo del camino y este nodo
+                    const isConnected = grapho.links.some(link =>
+                    (link.source.id === lastNode && link.target.id === node.id) ||
+                    (link.source.id === node.id && link.target.id === lastNode)
+
+                    );
+
+                    console.log(isConnected)
+                    if (isConnected) {
+                    path.push(node.id);
+                    backtrack(path);
+                    path.pop();
+                }
+            }
+        }
+    }
+
+    // Comenzar el backtracking desde cada nodo como punto de inicio
+    for (const node of grapho.nodes) {
+        backtrack([node.id]);
+    }
+
+    var container = document.getElementById('Phamiltonianos');
+    
+
+    paths.forEach((path, index) => {
+        const pathText = `Camino ${index + 1}: ${path.join(' -> ')}`;
+        const pathElement = document.createElement('p');
+        pathElement.textContent = pathText;
+        container.appendChild(pathElement);
+    });
+
+    container.style.display=""
+
+
+    console.log(paths)
+    return paths;
 
 }
 
