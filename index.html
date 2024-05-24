@@ -121,18 +121,30 @@
             stroke: rgb(255, 255, 0) !important; /* Cambiar el color de relleno a verde */
         }
 
-        #Phamiltonianos::-webkit-scrollbar {
+        #PanelCaminosHamiltonianos::-webkit-scrollbar {
         width: 8px; /* Ancho de la barra de scroll */
         }   
 
-        #Phamiltonianos::-webkit-scrollbar-track {
+        #PanelCaminosHamiltonianos::-webkit-scrollbar-track {
         background-color: #f1f1f100; /* Color de fondo de la barra de scroll */
         }
 
-        #Phamiltonianos::-webkit-scrollbar-thumb {
+        #PanelCaminosHamiltonianos::-webkit-scrollbar-thumb {
         background-color: #888; /* Color del "pulgarcito" de la barra de scroll */
         border-radius: 4px; /* Borde redondeado del "pulgarcito" */
         }   
+
+        #PanelCaminosHamiltonianos a{
+            color: rgb(255, 255, 255); /* Cambiar color de los enlaces */
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .highlighted {
+            stroke: red;
+            stroke-width: 4px;
+        }
     </style>
 </head>
 <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;background-image: url('iamgen.avif'); background-size: cover; background-position: center; background-repeat: no-repeat;">
@@ -192,17 +204,31 @@
         <button onclick="markEdges()">Marcar Aristas</button>
         <button onclick="editEdges()">Editar Aristas</button>
         <button onclick="generateAdjacencyMatrix()">Generar matriz</button>
+        <button onclick="CaminosEularianos()">Caminos Eulerianos</button>
         <button onclick="CaminosHamiltonianos()">Caminos hamiltoniano</button>
         
         
     </nav>
     
-    <svg width="1200" height="700" style="background-color: rgb(0, 0, 0); border-radius: 10px; box-shadow: 1px 1px 5px rgb(255, 255, 255);"></svg>
+    <svg width="800" height="500" style="background-color: rgb(0, 0, 0); border-radius: 10px; box-shadow: 1px 1px 5px rgb(255, 255, 255);"></svg>
+
+    <div id="PanelCaminosHamiltonianos" style="width: 300px; height: 500px; background-color: rgb(0, 0, 0); border-radius: 5px; border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff; border-bottom: 1px solid #ffffff;border-right: 1px solid #ffffff; color: #ffffff; overflow-y: scroll; text-align: center; display: none;">
+    <label>Caminos Hamiltonianos:</label>
+    <br>
+    <br>
+    </div>
+    <div id="PanelCaminosEulerianos" style="width: 300px; height: 500px; background-color: rgb(0, 0, 0); border-radius: 5px; border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff; border-bottom: 1px solid #ffffff;border-right: 1px solid #ffffff; color: #ffffff; overflow-y: scroll; text-align: center; display: none;">
+    <label>Caminos Hamiltonianos:</label>
+    <br>
+    <br>
+    </div>
 
     <script>
         let aux = 0;
-const svgWidth = 1200;
-const svgHeight = 700;
+const svgWidth = 800;
+const svgHeight = 500;
 const nodeRadius = 20;
 
 const xMin = nodeRadius;
@@ -228,7 +254,7 @@ const svg = d3.select("svg");
 let simulation = d3.forceSimulation(graph.nodes)
     .force("link", d3.forceLink(graph.links).id(d => d.id).distance(100))
     .force("charge", d3.forceManyBody().strength(-50))
-    .force("center", d3.forceCenter(600, 350));
+    .force("center", d3.forceCenter(400, 250));
 
     let links = svg.selectAll(".link")
     .data(graph.links)
@@ -341,7 +367,7 @@ function drawGraph() {
     simulation = d3.forceSimulation(graph.nodes)
     .force("link", d3.forceLink(graph.links).id(d => d.id).distance(100))
     .force("charge", d3.forceManyBody().strength(-70))
-    .force("center", d3.forceCenter(600, 350));
+    .force("center", d3.forceCenter(400, 250));
 
     links = svg.selectAll(".link")
     .data(graph.links)
@@ -388,6 +414,8 @@ nodes.append("text")
 });
 
 }
+        
+
         function CaminosHamiltonianos() {
 
             let grapho = graph;
@@ -440,14 +468,22 @@ nodes.append("text")
         backtrack([node.id]);
     }
 
-    var container = document.getElementById('Phamiltonianos');
+    var container = document.getElementById('PanelCaminosHamiltonianos');
+    container.innerHTML = "";
+    container.display=""
     
 
     paths.forEach((path, index) => {
         const pathText = `Camino ${index + 1}: ${path.join(' -> ')}`;
-        const pathElement = document.createElement('p');
+        const pathElement = document.createElement('a');
+        pathElement.href = "#";
         pathElement.textContent = pathText;
+        pathElement.onclick = (e) => {
+                    e.preventDefault();
+                    highlightPath(path);
+                };
         container.appendChild(pathElement);
+        container.appendChild(document.createElement('br'));
     });
 
     container.style.display=""
@@ -456,6 +492,119 @@ nodes.append("text")
     console.log(paths)
     return paths;
 
+}
+
+function CaminosEularianos() {
+
+let container = document.getElementById('PanelCaminosHamiltonianos');
+container.innerHTML = ''; // Limpiar contenido previo
+container.display="";
+
+if (!hasEulerianPath(graph)) {
+    container.textContent = 'No hay camino euleriano en este grafo.';
+    return;
+}
+
+const eulerianPath = getEulerianPath(graph);
+const pathText = `Camino Euleriano: ${eulerianPath.join(' -> ')}`;
+const pathElement = document.createElement('a');
+pathElement.href = '#';
+pathElement.textContent = pathText;
+pathElement.onclick = (e) => {
+    e.preventDefault();
+    highlightPath(eulerianPath);
+};
+
+container.appendChild(pathElement);
+}
+
+// Verificar si un grafo tiene un camino euleriano
+function hasEulerianPath({ nodes, links }) {
+const degree = new Map(nodes.map(node => [node.id, 0]));
+
+links.forEach(({ source, target }) => {
+    degree.set(source.id, degree.get(source.id) + 1);
+    degree.set(target.id, degree.get(target.id) + 1);
+});
+
+let oddCount = 0;
+for (let d of degree.values()) {
+    if (d % 2 !== 0) {
+        oddCount++;
+    }
+}
+
+return oddCount === 0 || oddCount === 2;
+}
+
+// Obtener un camino euleriano usando el algoritmo de Fleury
+function getEulerianPath({ nodes, links }) {
+const adjList = new Map(nodes.map(node => [node.id, []]));
+
+links.forEach(({ source, target }) => {
+    adjList.get(source.id).push(target.id);
+    adjList.get(target.id).push(source.id);
+});
+
+const isBridge = (u, v) => {
+    const visited = new Set();
+    const dfs = (node) => {
+        visited.add(node);
+        adjList.get(node).forEach(neighbor => {
+            if (!visited.has(neighbor)) {
+                dfs(neighbor);
+            }
+        });
+    };
+
+    dfs(v);
+    return !visited.has(u);
+};
+
+const findStartNode = () => {
+    for (let [node, neighbors] of adjList.entries()) {
+        if (neighbors.length % 2 !== 0) {
+            return node;
+        }
+    }
+    return nodes[0].id;
+};
+
+const startNode = findStartNode();
+const stack = [startNode];
+const path = [];
+
+while (stack.length > 0) {
+    const node = stack[stack.length - 1];
+    const neighbors = adjList.get(node);
+
+    if (neighbors.length === 0) {
+        path.push(stack.pop());
+    } else {
+        const nextNode = neighbors.pop();
+        if (adjList.get(nextNode).includes(node) && !isBridge(node, nextNode)) {
+            stack.push(nextNode);
+            adjList.get(nextNode).splice(adjList.get(nextNode).indexOf(node), 1);
+        } else {
+            neighbors.unshift(nextNode);
+        }
+    }
+}
+
+return path;
+}
+
+function highlightPath(path) {
+            // Desmarcar todos los enlaces
+            svg.selectAll(".link").classed("highlighted", false);
+
+            // Marcar los enlaces del camino
+            for (let i = 0; i < path.length - 1; i++) {
+                svg.selectAll(".link")
+                    .filter(d => (d.source.id === path[i] && d.target.id === path[i + 1]) ||
+                                 (d.source.id === path[i + 1] && d.target.id === path[i]))
+                    .classed("highlighted", true);
+    }
 }
 
 function dragStarted(event, d) {
