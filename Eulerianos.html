@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRAFOS EULERIANOS</title>
+    <style>
+        body {
+            background-image: url('iamgen.avif'); /* Reemplaza 'ruta/de/la/imagen.jpg' con la ruta de tu imagen */
+            background-size: cover; /* Ajusta la imagen para cubrir todo el fondo */
+            background-repeat: no-repeat; /* Evita la repetición de la imagen */
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #002c5a;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .imagen {
+            display: block;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .imagen-container {
+            position: relative;
+            text-align: center;
+        }
+        .imagen-description {
+            margin-top: 10px;
+            color: #333;
+            font-size: 0.9em;
+        }
+        /* Estilo para los enlaces */
+        a {
+            color: #002c5a;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #002c5a;
+        }
+
+        .Hamiltonianos {
+            position: fixed; /* Establece la posición fija */
+            top: 90%; /* Ubica el borde superior del div en el centro vertical */
+            left: 90%; /* Ubica el borde izquierdo del div en el centro horizontal */
+            transform: translate(-50%, -50%); /* Corrige el centrado ajustando el desplazamiento */
+            background-color: rgba(255, 255, 255, 0); /* Color de fondo (cambia según tus necesidades) */
+            border-radius: 5px;
+            border-color: none;
+            padding: 20px; /* Añade espacio interno al div (ajusta según tus necesidades) */
+            z-index: 999; /* Asegura que esté por encima de otros elementos */
+        }
+
+        .Hamiltonianos button {
+            padding: 8px 16px;
+            border-color: #ffffff;
+            background-color: #f0f0f000;
+            color: #ffffff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-size: medium;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="Hamiltonianos" class="Hamiltonianos">
+        <button onclick="GoToHamiltonianos()">Hamiltonianos</button>
+    </div>
+
+    <div id="Aplicación" class="Hamiltonianos" style="top: 90%; left: 10%;">
+        <button onclick="GoToGrafos()">Graficacion</button>
+    </div>
+    <div class="container">
+        <h1>Historia de los grafos Eulerianos</h1>
+        <p>Los grafos eulerianos llevan el nombre del matemático suizo Leonhard Euler, quien los estudió en profundidad
+             en el siglo XVIII. La historia de los grafos eulerianos está íntimamente ligada al famoso problema de los
+            siete puentes de Königsberg.
+        </p>
+        <p>En 1736, Euler abordó el problema de los siete puentes de Königsberg, una ciudad de Prusia 
+            (ahora Kaliningrado, Rusia). La ciudad estaba dividida en cuatro áreas por el río Pregel y sus dos 
+            afluentes, con siete puentes que conectaban estas áreas. La pregunta era si era posible pasear por la ciudad 
+            cruzando cada puente exactamente una vez y regresar al punto de partida.
+        </p>
+        <p>Para abordar este problema, Euler abstrajo la situación a un modelo matemático simple llamado grafo, que 
+            consiste en puntos (vértices) conectados por líneas (aristas). Euler observó que el problema de los siete puentes 
+            podía ser representado como un grafo donde los vértices eran las áreas de la ciudad y las aristas eran los puentes. 
+            Luego, formuló condiciones para que existiera una ruta que cruzara cada puente exactamente una vez.</p>
+        <p>Euler demostró que una ruta que recorra cada arista exactamente una vez existe si y solo si el grafo es conexo y tiene a 
+            lo sumo dos vértices de grado impar. Esto se conoce como el Teorema de los Grafos Eulerianos.
+        </p>
+        <p>Esta solución sentó las bases para el estudio de los grafos eulerianos y los circuitos eulerianos. 
+            Un grafo euleriano es aquel que tiene un circuito euleriano, es decir, un circuito que recorre cada arista 
+            exactamente una vez. Un circuito euleriano es una forma particular de ciclo en un grafo.
+        </p>
+        <p>La teoría de grafos, iniciada por Euler y desarrollada por muchos otros matemáticos a lo largo de los siglos, 
+            ha encontrado aplicaciones en una amplia gama de campos, desde redes de computadoras hasta biología 
+            molecular, y sigue siendo una área activa de investigación en matemáticas puras y aplicadas.</p>
+        
+         <div class="imagen-container">
+            <img class="imagen" src="MapaKonisberg.png" alt="Representacion del problema de los puentes de Konisberg" width="500">
+            <div class="imagen-description">Mapa del río Pregel en Königsberg (por Leonhard Euler), que muestra dónde se encontraban los siete puentes. Sobre el mapa el modelo conceptual que plantea el problema. </div>
+         </div>
+
+        <h2>¿Qué son los grafos Eulerianos?</h2>
+
+        <p>Al hablar de grafos eulerianos se hace referencia a un grafo conexo que tiene un camino cerrado el 
+            cual  utiliza todas las aristas, comienza y termina en el mismo vértice. Un grafo euleriano también 
+            puede ser definido como un grafo que contiene un camino, un ciclo o un circuito euleriano, el cual se 
+            define como un grafo en el que existe un ciclo que pasa por cada arista una única vez, regresando de 
+            esta forma a su punto inicial. </p>
+        <h2>Ejemplos de grafo euleriano:</h2>
+        <h3>Grafo A</h3>
+        <img class="imagen" src="Grafo Euleriano.jpg" alt="Ejemplo de grafo euleriano" width="300">
+        <p>grafo Euleriano: Si</p>
+        <p>Camino Euleriano: v1 e1 v2 e3 v3 e2 v1</p>
+        <h2>Ejemplos de Aplicación</h2>
+            <p>A continuación, mostraremos dos ejemplos de aplicación de grafos eulerianos en situaciones prácticas:</p>
+
+            <h3>Ejemplo 1: Redes de comunicación y telecomunicaciones:</h3>
+            <p>En la optimización de redes de comunicación, como la transmisión de datos en redes de computadoras o la programación 
+                de rutas para sistemas de telecomunicaciones, los grafos eulerianos pueden ser útiles para garantizar una cobertura 
+                completa y eficiente de los nodos y enlaces de la red.</p>
+            <h3>Ejemplo 2: Biología molecular y genética:</h3>
+            <p> En la biología molecular y la genética, los grafos eulerianos pueden utilizarse para modelar interacciones
+                entre moléculas, como en la reconstrucción de redes metabólicas o en el análisis de secuencias genéticas 
+                para identificar rutas metabólicas o caminos evolutivos.</p>
+            <h3>Ejemplo 3: Diseño de circuitos de juegos: </h3>
+            <p>En el diseño de juegos de mesa, videojuegos o rompecabezas, los grafos eulerianos pueden utilizarse para crear desafíos 
+                de navegación o laberintos donde el objetivo sea recorrer todas las ubicaciones o pasos exactamente una vez.</p>
+    </div>
+
+    <script>
+        function GoToHamiltonianos (){
+
+        window.location.href = 'Hamiltonianos.html';
+        }
+
+        function GoToGrafos (){
+
+        window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

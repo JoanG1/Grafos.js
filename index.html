@@ -186,7 +186,7 @@
     <nav>
         
 
-        <button onclick="borrarGrafo()">Teoria Grafos</button>
+        <button onclick="GoToHamiltonianos()">Teoria Grafos</button>
         <button onclick="createNode()">Crear Grafo</button>
         <button onclick="markVertices()">Marcar Vertices</button>
         <button onclick="markEdges()">Marcar Aristas</button>
@@ -558,22 +558,8 @@ function goSimulation(){
 function createNode(){
     var div = document.getElementById("configPanel");
     div.style.display = "";
-}
-
-function generateAdjacencyMatrix() {
-    const n = graph.nodes.length;
-    const adjacencyMatrix = Array.from(Array(n), () => Array(n).fill(0));
-
-    console.table(links)
-    graph.links.forEach(link => {
-    const sourceIndex = nodes.indexOf(links.source);
-    const targetIndex = nodes.indexOf(links.target);
-    adjacencyMatrix[sourceIndex][targetIndex] = 1;
-    adjacencyMatrix[targetIndex][sourceIndex] = 1; // Si es un grafo no dirigido
-    });
-
-    console.log("Matriz");
-    console.table(adjacencyMatrix)
+    var div = document.getElementById("Phamiltonianos");
+    div.style.display="none";
 }
 
 function borrarGrafo (){
@@ -581,6 +567,11 @@ function borrarGrafo (){
     svg.selectAll("*").remove()
     
 
+}
+
+function GoToHamiltonianos (){
+
+    window.location.href = 'Hamiltonianos.html';
 }
     </script>
     
