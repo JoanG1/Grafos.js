@@ -63,7 +63,7 @@
         <button onclick="markVertices()">Marcar Vertices</button>
         <button onclick="markEdges()">Marcar Aristas</button>
         <button onclick="editEdges()">Editar Aristas</button>
-        <button onclick="generateAdjacencyMatrix()">Generar matriz</button>
+        <button onclick="showIncidenceMatrix()">Generar matriz</button>
         <button onclick="CaminosEularianos()">Caminos Eulerianos</button>
         <button onclick="CaminosHamiltonianos()">Caminos hamiltoniano</button>
         
@@ -81,6 +81,60 @@
 
     <script src="main.js"></script>
     <script src="CrearGrafo.js"></script>
+    <script>
+        function showIncidenceMatrix() {
+            // Crear una matriz vacía de tamaño nodos x aristas
+            let incidenceMatrix = Array(graph.nodes.length).fill(0).map(() => Array(graph.links.length).fill(0));
+
+            // Mapear los nodos a índices
+            let nodeIndexMap = new Map();
+            graph.nodes.forEach((node, index) => {
+                nodeIndexMap.set(node.id, index);
+            });
+
+            // Llenar la matriz de incidencia
+            graph.links.forEach((link, index) => {
+                let sourceIndex = nodeIndexMap.get(link.source.id || link.source);
+                let targetIndex = nodeIndexMap.get(link.target.id || link.target);
+                incidenceMatrix[sourceIndex][index] = 1;
+                incidenceMatrix[targetIndex][index] = 1;
+            });
+
+            // Crear una tabla HTML para mostrar la matriz de incidencia
+            let table = document.createElement('table');
+            let headerRow = document.createElement('tr');
+            let emptyHeader = document.createElement('th');
+            headerRow.appendChild(emptyHeader);
+
+            // Crear encabezados de columnas (aristas)
+            graph.links.forEach((link, index) => {
+                let th = document.createElement('th');
+                th.textContent = `${link.source.id || link.source}-${link.target.id || link.target}`;
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+
+            // Crear filas de la tabla
+            graph.nodes.forEach((node, nodeIndex) => {
+                let row = document.createElement('tr');
+                let nodeCell = document.createElement('td');
+                nodeCell.textContent = node.id;
+                row.appendChild(nodeCell);
+
+                incidenceMatrix[nodeIndex].forEach((value) => {
+                    let cell = document.createElement('td');
+                    cell.textContent = value;
+                    row.appendChild(cell);
+                });
+                table.appendChild(row);
+            });
+
+            // Mostrar la tabla en el contenedor de caminos
+            const container = document.getElementById('PanelCaminosHamiltonianos');
+            container.innerHTML = ''; // Limpiar contenido previo
+            container.appendChild(table);
+        }
+    </script>
 
     
 </body>
